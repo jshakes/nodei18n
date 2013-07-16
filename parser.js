@@ -1,7 +1,7 @@
 var properties = {
   input_dir: "templates",
-  langs: ["en", "de", "fr"],
-  active_lang: "en",
+  active_lang: "de",
+  fallback_lang: "en",
   output_dir: "output"
 }
 
@@ -27,52 +27,43 @@ function Parser(properties){
     }
 
     this.i18n.configure({
-      locales: that.langs,
+      locales: [that.active_lang, that.fallback_lang],
       directory: 'locales',
-      defaultLocale: 'en',
+      defaultLocale: 'en'
     });
 
-    for(var i = 0; i < this.langs.length; i++){
+    //create the output directory if necessary
+    var lang_dir = that.output_dir + "/" + active_lang;
 
-      that.active_lang = that.langs[i];
-      
-      (function(active_lang){
+    !that.fs.existsSync(lang_dir, function(exists){
 
-        //create the output directory if necessary
-        var lang_dir = that.output_dir + "/" + active_lang;
+      if(!exists) that.fs.mkdir(lang_dir, function(){
+        console.log("created directory at " + lang_dir);
+      });
+    });
 
-        !that.fs.existsSync(lang_dir, function(exists){
+    that.fs.readdir(that.input_dir, function(err, files){
 
-          if(!exists) that.fs.mkdir(lang_dir, function(){
-            console.log("created directory at " + lang_dir);
-          });
-        });
+      if(err) console.log(err);
+      else{
 
-        that.fs.readdir(that.input_dir, function(err, files){
+        for(var i = 0; i < files.length; i++){
 
-          if(err) console.log(err);
-          else{
+          var file = files[i];
+          
+          (function(file){
 
-            for(var i = 0; i < files.length; i++){
+            var html = that.parse_file(file);
+            
+            if(html){
 
-              var file = files[i];
-              
-              (function(file){
-
-                var html = that.parse_file(file);
-                
-                if(html){
-
-                  output_path = that.output_dir + "/" + active_lang + "/" + file.substring(0, file.indexOf(".ejs"));
-                  that.write_output_to_file(output_path, html);
-                }
-              })(file);
+              output_path = that.output_dir + "/" + active_lang + "/" + file.substring(0, file.indexOf(".ejs"));
+              that.write_output_to_file(output_path, html);
             }
-          }
-        });
-      })(that.active_lang);
-
-    }
+          })(file);
+        }
+      }
+    });
   }
 
   Parser.prototype.write_output_to_file = function(output_path, content){
@@ -108,7 +99,7 @@ function Parser(properties){
 
     that.i18n.setLocale(that.active_lang);
 
-    console.log("language is "+ that.active_lang);
+    console.log("language is " + that.active_lang);
     
     if(vars != undefined && vars.length){
 
