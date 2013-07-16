@@ -6,3 +6,25 @@ var app = express();
 
 app.listen(port)
 console.log('Express app started on port '+port)
+
+var i18n = require("i18n");
+var ejs = require("ejs");
+var fs = require('fs');
+
+i18n.configure({
+  locales:['en', 'de'],
+  directory: 'locales',
+  defaultLocale: 'en',
+});
+
+t = function(key){
+
+  i18n.setLocale('de');
+  return i18n.__(key)
+}
+
+file = fs.readFileSync("template.mustache.ejs", 'utf8');
+
+html = ejs.render(file);
+
+console.log(html);
