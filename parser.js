@@ -1,11 +1,22 @@
-var properties = {
-  input_dir: "templates",
-  active_lang: "de",
-  fallback_lang: "en",
-  output_dir: "output"
+
+var langs_to_translate = ["de", "en", "fr"];
+
+for(var i = 0; i < langs_to_translate.length; i++){
+
+  var lang = langs_to_translate[i];
+
+  var properties = {
+    input_dir: "templates",
+    active_lang: lang,
+    fallback_lang: "en",
+    output_dir: "output"
+  }
+
+  var parser = new Parser(properties);
+
+  parser.translate_files();
 }
 
-parser = new Parser(properties);
 
 function Parser(properties){
 
@@ -31,18 +42,23 @@ function Parser(properties){
       directory: 'locales',
       defaultLocale: 'en'
     });
+  }
+
+  Parser.prototype.translate_files = function(){
+
+    var that = this;
 
     //create the output directory if necessary
-    var lang_dir = that.output_dir + "/" + active_lang;
+    var lang_dir = this.output_dir + "/" + this.active_lang;
 
-    !that.fs.existsSync(lang_dir, function(exists){
+    !this.fs.existsSync(lang_dir, function(exists){
 
       if(!exists) that.fs.mkdir(lang_dir, function(){
         console.log("created directory at " + lang_dir);
       });
     });
 
-    that.fs.readdir(that.input_dir, function(err, files){
+    this.fs.readdir(this.input_dir, function(err, files){
 
       if(err) console.log(err);
       else{
@@ -52,12 +68,12 @@ function Parser(properties){
           var file = files[i];
           
           (function(file){
-
+            console.log("Parsing " + file + "...");
             var html = that.parse_file(file);
             
             if(html){
 
-              output_path = that.output_dir + "/" + active_lang + "/" + file.substring(0, file.indexOf(".ejs"));
+              output_path = that.output_dir + "/" + that.active_lang + "/" + file.substring(0, file.indexOf(".ejs"));
               that.write_output_to_file(output_path, html);
             }
           })(file);
@@ -86,7 +102,6 @@ function Parser(properties){
   Parser.prototype.parse_file = function(path){
 
     var that = this;
-    console.log("language is "+ that.active_lang);
 
     file = this.fs.readFileSync(this.input_dir + "/" + path, 'utf8');
     html = this.ejs.render(file, {that: that});
@@ -98,13 +113,11 @@ function Parser(properties){
     var translation
 
     that.i18n.setLocale(that.active_lang);
-
-    console.log("language is " + that.active_lang);
     
     if(vars != undefined && vars.length){
 
-      var args = vars.unshift(key);
-      translation = that.i18n.__.call(this, args);
+      vars.unshift(key);
+      translation = that.i18n.__.apply(this, vars);
     }
     else translation = that.i18n.__(key);
 

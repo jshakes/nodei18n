@@ -18,5 +18,4 @@ var app = express();
 app.listen(port)
 console.log('Express app started on port '+port)
 
-require("./parser.js");
-
+var parser = require("./parser.js");

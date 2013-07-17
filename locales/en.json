@@ -1,3 +1,8 @@
 {
-	"click-me": "Click me"
+	"2": 2,
+	"10": 10,
+	"click-me": "Click me",
+	"Click me": "Click me",
+	"Engine engine number %d": "Engine engine number %d",
+	"On the %s transit line": "On the %s transit line"
 }

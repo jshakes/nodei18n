@@ -1,5 +1,7 @@
 {
 	"2": 2,
 	"10": 10,
-	"Click me": "Klich mich"
+	"Click me": "Klich mich",
+	"Engine engine number %d": "Lokomotive Lokomotive nummer %d",
+	"On the %s transit line": "Auf der %s Bahn-Linie"
 }
